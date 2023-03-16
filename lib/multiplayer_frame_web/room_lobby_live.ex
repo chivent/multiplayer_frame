@@ -2,7 +2,6 @@ defmodule MultiplayerFrameWeb.RoomLobbyLive do
   use MultiplayerFrameWeb, :live_view
   alias MultiplayerFrame.RoomServer
 
-  # TODO: Kick if no player name/id
   def mount(%{"id" => id}, session, socket) do
     socket =
       socket

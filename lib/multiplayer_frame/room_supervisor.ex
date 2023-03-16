@@ -25,9 +25,12 @@ defmodule MultiplayerFrame.RoomSupervisor do
     {:ok, room_id}
   end
 
-  # def room_exists?(room_id) do
-  # end
+  def room_exists?(room_code) do
+    GenServer.whereis({:global, room_code}) != :undefined
+  end
 
-  # def delete_room(room_id) do
-  # end
+  def close_room(room_code) do
+    pid = GenServer.whereis({:global, room_code})
+    DynamicSupervisor.terminate_child(__MODULE__, pid)
+  end
 end
