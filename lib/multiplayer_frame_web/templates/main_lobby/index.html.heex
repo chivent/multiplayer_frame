@@ -1,0 +1,22 @@
+<div class="flex flex-col md:flex-row p-6 justify-items-stretch md:content-center items-stretch justify-center gap-6">
+  <div class="p-4 bg-gray-300 border-solid rounded-md grow">
+    <%= form_for :player_info, Routes.main_lobby_path(@conn, :join), [class: "flex flex-col space-y-6 justify-content"], fn f -> %>
+        <div class = "flex flex-col space-y-2">
+          <%= label f, "Display Name" %>
+          <%= text_input f, :name, class: "rounded border-none" %>
+        </div>
+        <div class = "flex flex-col space-y-2">
+          <%= label f, "Room Code (Leave blank if creating a room)" %>
+          <%= text_input f, :room_code, class: "uppercase rounded border-none" %>
+        </div>
+        <div class = "flex justify-center">
+          <%= submit "Create or Join Room", class: "button bg-gray-500 p-3 w-1/3 rounded" %>
+        </div>
+    <%end %>
+  </div>
+
+  <div class="p-4 bg-gray-300 border-solid rounded-md grow">
+    Hello there!
+    Blah Blah this is an explanation
+  </div>
+</div>
