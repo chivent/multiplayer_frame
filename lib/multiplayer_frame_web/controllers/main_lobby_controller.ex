@@ -11,7 +11,8 @@ defmodule MultiplayerFrameWeb.MainLobbyController do
   def join(conn, %{"player_info" => %{"name" => name, "room_code" => code}}) when code != "" do
     conn
     |> put_session(:player, Player.create_player(name))
-    |> redirect(to: Routes.room_lobby_path(conn, :index, code))
+    |> put_session(:room_code, code)
+    |> redirect(to: Routes.room_lobby_path(conn, :index))
   end
 
   @spec join(Plug.Conn.t(), any) :: Plug.Conn.t()
@@ -21,6 +22,7 @@ defmodule MultiplayerFrameWeb.MainLobbyController do
 
     conn
     |> put_session(:player, player)
-    |> redirect(to: Routes.room_lobby_path(conn, :index, room_code))
+    |> put_session(:room_code, room_code)
+    |> redirect(to: Routes.room_lobby_path(conn, :index))
   end
 end

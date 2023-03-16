@@ -26,7 +26,7 @@ defmodule MultiplayerFrame.RoomSupervisor do
   end
 
   def room_exists?(room_code) do
-    GenServer.whereis({:global, room_code}) != :undefined
+    GenServer.whereis({:global, room_code}) != nil
   end
 
   def close_room(room_code) do

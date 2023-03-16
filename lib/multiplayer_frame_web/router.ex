@@ -11,7 +11,8 @@ defmodule MultiplayerFrameWeb.Router do
   end
 
   pipeline :room_servers do
-    plug MultiplayerFrame.Plugs.EnsureRoomIsOpen
+    plug MultiplayerFrame.Plugs.EnsurePlayerIsValid
+    plug MultiplayerFrame.Plugs.EnsureRoomIsAvailable
   end
 
   pipeline :api do
@@ -25,10 +26,10 @@ defmodule MultiplayerFrameWeb.Router do
     post "/join", MainLobbyController, :join
   end
 
-  scope "/room", MultiplayerFrameWeb do
+  scope "/in-game", MultiplayerFrameWeb do
     pipe_through [:browser, :room_servers]
 
-    live "/:id", RoomLobbyLive, :index
+    live "/", RoomLobbyLive, :index
   end
 
   # Other scopes may use custom stacks.

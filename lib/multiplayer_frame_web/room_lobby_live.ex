@@ -1,21 +1,56 @@
 defmodule MultiplayerFrameWeb.RoomLobbyLive do
   use MultiplayerFrameWeb, :live_view
-  alias MultiplayerFrame.RoomServer
+  alias MultiplayerFrame.{RoomServer, RoomSupervisor}
 
-  def mount(%{"id" => id}, session, socket) do
+  def mount(_, session, socket) do
     socket =
       socket
-      |> assign(:room_code, id)
+      |> assign_from_session(session)
       |> assign(:players, [])
       |> join_room(session, connected?(socket))
 
     {:ok, socket}
   end
 
+  defp assign_from_session(socket, %{"player" => player, "room_code" => room_code}) do
+    socket
+    |> assign(:room_code, room_code)
+    |> assign(:player_id, player.id)
+  end
+
+  defp join_room(%{assigns: %{room_code: room_code}} = socket, session, true) do
+    if RoomSupervisor.room_exists?(room_code) do
+      join_room(socket, session, :room_open)
+    else
+      join_room(socket, session, :room_closed)
+    end
+  end
+
+  defp join_room(socket, %{"player" => player}, :room_open) do
+    room_code = socket.assigns.room_code
+    Phoenix.PubSub.subscribe(MultiplayerFrame.PubSub, "rooms:#{room_code}")
+
+    case RoomServer.player_joins(room_code, self(), player) do
+      players when is_map(players) ->
+        assign(socket, players: Map.values(players))
+
+      _ ->
+        assign(socket, players: [])
+    end
+  end
+
+  defp join_room(socket, _, :room_closed) do
+    socket
+    |> put_flash(:error, "The room you're looking for does not exist.")
+    |> redirect(to: Routes.root_path(socket, :index))
+  end
+
+  defp join_room(socket, _, false), do: socket
+
   def render(assigns) do
     ~H"""
       <div>
-        <button phx-click="mock_call">Mock Check</button>
+        <div> <%= assigns.room_code %> </div>
         <%= for player <- assigns.players do %>
           <div> <%= player.name %> </div>
         <% end %>
@@ -33,21 +68,4 @@ defmodule MultiplayerFrameWeb.RoomLobbyLive do
   end
 
   def handle_info(_, socket), do: {:noreply, socket}
-
-  defp join_room(socket, %{"player" => player}, connected) when connected do
-    room_code = socket.assigns.room_code
-    Phoenix.PubSub.subscribe(MultiplayerFrame.PubSub, "rooms:#{room_code}")
-
-    socket = assign(socket, player_id: player.id)
-
-    case RoomServer.player_joins(room_code, self(), player) do
-      players when is_map(players) ->
-        assign(socket, players: Map.values(players))
-
-      _ ->
-        assign(socket, players: [])
-    end
-  end
-
-  defp join_room(socket, _, _), do: socket
 end
