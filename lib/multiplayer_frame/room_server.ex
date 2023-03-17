@@ -54,7 +54,6 @@ defmodule MultiplayerFrame.RoomServer do
         {"server:player_joins", player}
       )
 
-      # TODO: Would be nice if I can update player list by order of appearance
       state =
         state
         |> put_in([:players, player.id], player)
