@@ -6,4 +6,9 @@ defmodule MultiplayerFrame.Player do
     |> struct(%{name: name})
     |> Map.put(:id, Ecto.UUID.autogenerate())
   end
+
+  def update_player(player, name) do
+    player
+    |> struct(%{name: name})
+  end
 end

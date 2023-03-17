@@ -7,9 +7,6 @@ config :multiplayer_frame, MultiplayerFrameWeb.Endpoint,
   secret_key_base: "k4gFdVJFWCpaNOQYF3qAdPYKcdCrCBaSHkAYz92VlVScIrklkLzfUDCfq+4+tLxg",
   server: false
 
-# In test we don't send emails.
-config :multiplayer_frame, MultiplayerFrame.Mailer, adapter: Swoosh.Adapters.Test
-
 # Print only warnings and errors during test
 config :logger, level: :warn
 

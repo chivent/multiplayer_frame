@@ -36,24 +36,24 @@ defmodule MultiplayerFrame.RoomServer do
 
   @impl true
   def handle_call({"player_joins", {pid, player}}, _, state) do
-    state =
-      if get_in(state, [:players, player.id]) do
-        state
-      else
-        Process.monitor(pid)
+    if get_in(state, [:players, player.id]) do
+      {:reply, {:error, :already_in_room}, state}
+    else
+      Process.monitor(pid)
 
-        Phoenix.PubSub.broadcast(
-          MultiplayerFrame.PubSub,
-          "rooms:#{state.room_code}",
-          {"server:player_joins", player}
-        )
+      Phoenix.PubSub.broadcast(
+        MultiplayerFrame.PubSub,
+        "rooms:#{state.room_code}",
+        {"server:player_joins", player}
+      )
 
+      state =
         state
         |> put_in([:players, player.id], player)
         |> put_in([:player_pids, pid], player.id)
-      end
 
-    {:reply, state.players, state}
+      {:reply, {:ok, state.players}, state}
+    end
   end
 
   @impl true
