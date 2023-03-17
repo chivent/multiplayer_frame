@@ -37,7 +37,7 @@ defmodule MultiplayerFrameWeb.MainLobbyController do
   defp create_player(conn, name) do
     player = get_session_player(conn)
 
-    if Map.has_key?(player, :id) do
+    if Map.get(player, :id) do
       Player.update_player(player, name)
     else
       Player.create_player(name)

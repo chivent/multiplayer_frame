@@ -1,8 +1,6 @@
 defmodule MultiplayerFrame.Plugs.EnsureRoomIsAvailable do
   import Plug.Conn, only: [halt: 1]
-  import Phoenix.Controller, only: [put_flash: 3, redirect: 2]
-  alias MultiplayerFrameWeb.Router.Helpers, as: Routes
-  alias MultiplayerFrame.{RoomServer, RoomSupervisor}
+  alias MultiplayerFrame.{RoomServer, RoomSupervisor, Utils}
 
   def init(opts), do: opts
 
@@ -15,8 +13,7 @@ defmodule MultiplayerFrame.Plugs.EnsureRoomIsAvailable do
     else
       {error_type, _} ->
         conn
-        |> put_flash(:error, error_message(error_type))
-        |> redirect(to: Routes.root_path(conn, :index))
+        |> Utils.redirect_to_root(error_type)
         |> halt()
     end
   end
@@ -27,15 +24,5 @@ defmodule MultiplayerFrame.Plugs.EnsureRoomIsAvailable do
 
   defp room_available?(room_code) do
     {:room_available?, RoomServer.check_room_capacity(room_code)}
-  end
-
-  defp error_message(type) do
-    case type do
-      :valid_room? ->
-        "The room you're looking for does not exist."
-
-      :room_available? ->
-        "The room you're looking for is unavailable."
-    end
   end
 end

@@ -30,6 +30,13 @@ defmodule MultiplayerFrame.RoomServer do
     )
   end
 
+  def kick_player(room_code, caller_id, player) do
+    GenServer.cast(
+      name(room_code),
+      {"kick_player", {caller_id, player}}
+    )
+  end
+
   def check_room_capacity(room_code) do
     GenServer.call(name(room_code), "check_room_capacity")
   end
@@ -52,7 +59,7 @@ defmodule MultiplayerFrame.RoomServer do
         |> put_in([:players, player.id], player)
         |> put_in([:player_pids, pid], player.id)
 
-      {:reply, {:ok, state.players}, state}
+      {:reply, {:ok, {state.host, state.players}}, state}
     end
   end
 
@@ -61,6 +68,16 @@ defmodule MultiplayerFrame.RoomServer do
     player_count = state.players |> Map.keys() |> length()
 
     {:reply, player_count < 4, state}
+  end
+
+  @impl true
+  def handle_cast({"kick_player", {caller_id, player}}, state) do
+    if caller_id == state.host do
+      {pid, _} = Enum.find(state.player_pids, fn {_pid, id} -> id == player end)
+      send(pid, "server:kicked")
+    end
+
+    {:noreply, state}
   end
 
   @impl true
@@ -87,7 +104,6 @@ defmodule MultiplayerFrame.RoomServer do
 
   @impl true
   def handle_info({:DOWN, _ref, _, pid, _}, state) do
-    IO.inspect("player leaves")
     player_id = get_in(state, [:player_pids, pid])
     send(self(), {"player_leaves", {pid, player_id}})
 
