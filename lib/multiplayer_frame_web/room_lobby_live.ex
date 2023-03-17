@@ -70,21 +70,30 @@ defmodule MultiplayerFrameWeb.RoomLobbyLive do
 
   def handle_event("kick_player", %{"player" => player}, socket) do
     RoomServer.kick_player(socket.assigns.room_code, socket.assigns.player_id, player)
-    {:noreply, socket}
+    noreply(socket)
   end
 
   def handle_info({"server:player_joins", %{id: id} = player}, socket)
       when id != socket.assigns.player_id do
-    {:noreply, assign(socket, players: [player | socket.assigns.players])}
+    socket
+    |> assign(players: [player | socket.assigns.players])
+    |> noreply()
   end
 
   def handle_info("server:kicked", socket) do
-    {:noreply, Utils.redirect_to_root(socket, :kicked)}
+    socket
+    |> Utils.redirect_to_root(:kicked)
+    |> noreply()
   end
 
-  def handle_info({"server:player_leaves", players}, socket) do
-    {:noreply, assign(socket, players: Map.values(players))}
+  def handle_info({"server:player_leaves", {players, new_host}}, socket) do
+    socket
+    |> assign(players: Map.values(players))
+    |> assign(host: new_host)
+    |> noreply()
   end
 
   def handle_info(_, socket), do: {:noreply, socket}
+
+  defp noreply(socket), do: {:noreply, socket}
 end

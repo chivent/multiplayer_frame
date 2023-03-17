@@ -54,6 +54,7 @@ defmodule MultiplayerFrame.RoomServer do
         {"server:player_joins", player}
       )
 
+      # TODO: Would be nice if I can update player list by order of appearance
       state =
         state
         |> put_in([:players, player.id], player)
@@ -89,17 +90,20 @@ defmodule MultiplayerFrame.RoomServer do
 
     players_left = get_in(state, [:players])
 
-    Phoenix.PubSub.broadcast(
-      MultiplayerFrame.PubSub,
-      "rooms:#{state.room_code}",
-      {"server:player_leaves", players_left}
-    )
-
     if Map.keys(players_left) |> length() < 1 do
       RoomSupervisor.close_room(state.room_code)
-    end
+      {:noreply, state}
+    else
+      new_host = Map.keys(state.players) |> List.first()
 
-    {:noreply, state}
+      Phoenix.PubSub.broadcast(
+        MultiplayerFrame.PubSub,
+        "rooms:#{state.room_code}",
+        {"server:player_leaves", {players_left, new_host}}
+      )
+
+      {:noreply, Map.put(state, :host, new_host)}
+    end
   end
 
   @impl true
