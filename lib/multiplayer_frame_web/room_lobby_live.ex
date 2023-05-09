@@ -8,7 +8,7 @@ defmodule MultiplayerFrameWeb.RoomLobbyLive do
       |> assign_from_session(session)
       |> assign(:loading, true)
       |> assign(:players, [])
-      |> assign(host: nil)
+      |> assign(host_id: nil)
       |> join_room(session, connected?(socket))
 
     {:ok, socket}
@@ -36,10 +36,10 @@ defmodule MultiplayerFrameWeb.RoomLobbyLive do
       {:error, :already_in_room} ->
         Utils.redirect_to_root(socket, :already_in_room)
 
-      {:ok, {host, players}} ->
+      {:ok, {host_id, players}} ->
         socket
         |> assign(players: Map.values(players))
-        |> assign(host: host)
+        |> assign(host_id: host_id)
         |> assign(loading: false)
     end
   end
@@ -49,22 +49,40 @@ defmodule MultiplayerFrameWeb.RoomLobbyLive do
   def render(assigns) do
     ~H"""
     <%= if assigns.loading do %>
-      Joining room <%=assigns.room_code %>...
+      <div class="flex p-4 justify-center">Joining room <%=assigns.room_code %>... </div>
     <% else %>
-      <div class = "p-4 bg-gray-300 border-solid rounded-md w-full" >
-        <div class="text-lg font-bold"> <%= assigns.room_code %> </div>
-        <ul class="list-style-bullet">
-          <%= for player <- assigns.players do %>
-            <li class = "flex gap-4">
-              <p> <%= player.name %> <%= if assigns.host == player.id, do: "(Host)" %></p>
-              <%= if assigns.host == assigns.player_id && assigns.host != player.id do %>
-                <button phx-click="kick_player" phx-value-player={player.id}> Kick </button>
-              <% end %>
-            </li>
-          <% end %>
-        </ul>
+      <div class="p-4 flex flex-row gap-4">
+        <div class = "p-4 bg-gray-300 border-solid rounded-md flex-0" >
+          <h3 class="font-bold"> Lobby Code </h3>
+          <div class="text-2xl font-bold"> <%= assigns.room_code %> </div>
+
+          <h3 class="font-bold pt-4"> Players </h3>
+          <ul class="list-style-bullet">
+            <%= for player <- assigns.players do %>
+              <.player is_host?={assigns.host_id == player.id} i_am_host?={assigns.host_id == assigns.player_id} player={player} />
+            <% end %>
+          </ul>
+        </div>
+
+        <div class = "text-gray-500 bg-gray-300 border-solid rounded-md flex-1 flex justify-center items-center" >
+          Activity Content
+        </div>
       </div>
     <% end %>
+    """
+  end
+
+  def player(assigns) do
+    ~H"""
+      <li class = "flex gap-4">
+        <p>
+          <%= assigns.player.name %>
+          <%= if assigns.is_host? do %> <span class="text-orange-600"> (Host) </span> <% end %>
+        </p>
+        <%= if assigns.i_am_host? && !assigns.is_host? do %>
+          <button phx-click="kick_player" phx-value-player={assigns.player.id} class="underline hover:opacity-70"> Kick </button>
+        <% end %>
+      </li>
     """
   end
 
@@ -86,10 +104,10 @@ defmodule MultiplayerFrameWeb.RoomLobbyLive do
     |> noreply()
   end
 
-  def handle_info({"server:player_leaves", {players, new_host}}, socket) do
+  def handle_info({"server:player_leaves", {players, new_host_id}}, socket) do
     socket
     |> assign(players: Map.values(players))
-    |> assign(host: new_host)
+    |> assign(host_id: new_host_id)
     |> noreply()
   end
 

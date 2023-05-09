@@ -12,7 +12,7 @@ defmodule MultiplayerFrame.RoomServer do
       __MODULE__,
       %{
         room_code: room_code,
-        host: player.id,
+        host_id: player.id,
         players: %{},
         player_pids: %{}
       },
@@ -59,7 +59,7 @@ defmodule MultiplayerFrame.RoomServer do
         |> put_in([:players, player.id], player)
         |> put_in([:player_pids, pid], player.id)
 
-      {:reply, {:ok, {state.host, state.players}}, state}
+      {:reply, {:ok, {state.host_id, state.players}}, state}
     end
   end
 
@@ -72,7 +72,7 @@ defmodule MultiplayerFrame.RoomServer do
 
   @impl true
   def handle_cast({"kick_player", {caller_id, player}}, state) do
-    if caller_id == state.host do
+    if caller_id == state.host_id do
       {pid, _} = Enum.find(state.player_pids, fn {_pid, id} -> id == player end)
       send(pid, "server:kicked")
     end
@@ -93,15 +93,15 @@ defmodule MultiplayerFrame.RoomServer do
       RoomSupervisor.close_room(state.room_code)
       {:noreply, state}
     else
-      new_host = Map.keys(state.players) |> List.first()
+      new_host_id = Map.keys(state.players) |> List.first()
 
       Phoenix.PubSub.broadcast(
         MultiplayerFrame.PubSub,
         "rooms:#{state.room_code}",
-        {"server:player_leaves", {players_left, new_host}}
+        {"server:player_leaves", {players_left, new_host_id}}
       )
 
-      {:noreply, Map.put(state, :host, new_host)}
+      {:noreply, Map.put(state, :host_id, new_host_id)}
     end
   end
 
