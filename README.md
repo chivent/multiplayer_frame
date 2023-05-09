@@ -1,13 +1,20 @@
 # MultiplayerFrame
 
-Frame for basic multiplayer room creation, with each room supporting up to of 4 players
+A frame for basic multiplayer party rooms written in Elixir, with each created room supporting up to 4 users.
+
+## How it Works
 
 - Hosts can easily create a room with a random generated room-code.
 - Other players can join existing rooms using the same room-code.
-- Hosts can kick players, and host status will automatically swap to the next available player if host leaves
-- Can probably support up to 10 players if limit is updated, but will remain at a small scale till larger changes are applied.
+- Each browser may only join the same room once (aka using incognito would count as a different user.)
+- The room will automatically shut down once no players are left.
 
-## Instructions
+## Host Actions
+
+- Hosts can kick players
+- Host status will automatically swap to the next available player if host leaves/disconnects
+
+# Instructions
 
 To start your Phoenix server:
 

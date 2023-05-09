@@ -1,22 +1,32 @@
-<div class="flex flex-col md:flex-row p-6 justify-items-stretch md:content-center items-stretch justify-center gap-6">
-  <div class="p-4 bg-gray-300 border-solid rounded-md grow">
-    <%= form_for :player_info, Routes.main_lobby_path(@conn, :join), [class: "flex flex-col space-y-6 justify-content"], fn f -> %>
-        <div class = "flex flex-col space-y-2">
-          <%= label f, "Display Name" %>
-          <%= text_input f, :name, class: "rounded border-none", value: @player.name, required: true %>
-        </div>
-        <div class = "flex flex-col space-y-2">
-          <%= label f, "Room Code (Leave blank if creating a room)" %>
-          <%= text_input f, :room_code, class: "uppercase rounded border-none", maxlength: 6 %>
-        </div>
-        <div class = "flex justify-center">
-          <%= submit "Create or Join Room", class: "button bg-gray-500 p-3 w-1/3 rounded" %>
-        </div>
-    <%end %>
-  </div>
+<div class="p-6">
+  <h3 class="text-2xl font-bold pb-4 text-center"> Multiplayer Frame Demo </h3>
+  <div class="flex flex-col md:flex-row justify-items-stretch md:content-center items-stretch justify-center gap-6">
+    <div class="p-4 pb-6 bg-gray-300 border-solid rounded-md flex-1 justify-center items-center">
+      <%= form_for :player_info, Routes.main_lobby_path(@conn, :join), [class: "flex flex-col space-y-6 justify-content"], fn f -> %>
+          <div class = "flex flex-col space-y-2">
+            <%= label f, "Display Name" %>
+            <%= text_input f, :name, class: "rounded border-none", value: @player.name, required: true %>
+          </div>
+          <div class = "flex flex-col space-y-2">
+            <%= label f, "Room Code (Leave blank if creating a room)" %>
+            <%= text_input f, :room_code, class: "uppercase rounded border-none", maxlength: 6 %>
+          </div>
+          <div class = "flex justify-center">
+            <%= submit "Create or Join Room", class: "button bg-gray-500 p-3 rounded" %>
+          </div>
+      <%end %>
+    </div>
 
-  <div class="p-4 bg-gray-300 border-solid rounded-md grow">
-    Hello there!
-    Blah Blah this is an explanation
+    <div class="p-4 bg-gray-300 border-solid rounded-md flex-1">
+      <h3 class="text-lg font-bold"> Welcome! </h3>
+      <p class="pb-4"> This is a basic multiplayer rooms setup, good for those looking to try making their own multiplayer activities. </p>
+      <p> One player (the host) creates a room and other players can join with the same room code. </p>
+      <ul class="list-disc  pb-4 ml-8">
+        <li> Hosts can kick other players in the room </li>
+        <li> If the host disconnects, a different player will assume the role of host.</li>
+      </ul>
+
+      <p> By default, up to 4 players are allowed to join each room. This configuration can be updated in the code.</p>
+    </div>
   </div>
 </div>

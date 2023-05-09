@@ -1,10 +1,11 @@
 defmodule MultiplayerFrame.Utils do
   alias Phoenix.{Controller, LiveView}
   alias MultiplayerFrameWeb.Router.Helpers, as: Routes
+  @characters Enum.concat([?0..?9, ?A..?Z])
 
   def generate_room_code do
     1..6
-    |> Enum.reduce([], fn _el, acc -> [Enum.random(?A..?Z) | acc] end)
+    |> Enum.reduce([], fn _el, acc -> [Enum.random(@characters) | acc] end)
     |> List.to_string()
   end
 
@@ -25,7 +26,7 @@ defmodule MultiplayerFrame.Utils do
       end
 
     module =
-      if %Plug.Conn{} == socket_or_conn do
+      if match?(%Plug.Conn{}, socket_or_conn) do
         Controller
       else
         LiveView
